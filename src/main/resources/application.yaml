@@ -1,0 +1,4 @@
+spring:
+  data:
+    mongodb:
+      uri: ${mongodb+srv://vigneshuvari_db_user:94zI8NnFviJhp1Dk@cluster0.wcjxsbk.mongodb.net/?appName=Cluster0}
