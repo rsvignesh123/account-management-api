@@ -43,24 +43,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        // 2. Token illai enraal (Anonymous User), filter chain-ai thodara vidungal
+        // FIX 3: Token illai enraal, automatic-a adutha filter chain-ku anuppungall.
+        // Inge manual-a AnonymousToken set seiya thevai illai!
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Spring Security 403 Error adikkaamal irukka Anonymous Authentication set seigirom
-                AnonymousAuthenticationToken anonymousToken = new AnonymousAuthenticationToken(
-                        "key",
-                        "anonymousUser",
-                        AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")
-                );
-                SecurityContextHolder.getContext().setAuthentication(anonymousToken);
-            }
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
 
-        // 3. Token irundhu athu thavaraaga/expire aahi irundhaal 401 adikkum
         if (!jwtUtil.validateToken(token)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -68,7 +59,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String username = jwtUtil.extractUsername(token);
 
-        // 4. Valid token-kaana user authentication set seigirom
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         username,

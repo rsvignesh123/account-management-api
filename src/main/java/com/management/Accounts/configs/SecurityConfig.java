@@ -28,10 +28,10 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                // anonymous() ஐ அனுமதிப்பதன் மூலம் லாகின் செய்யாத பயனர்களுக்கும் 403 வராது
-                .anonymous(anonymous -> anonymous.disable())
+                // FIX 1: Anonymous-ai disable seiya koodathu! Spring-aiye athan pokkil vida vendum.
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/api/auth/**").permitAll()
+                        // FIX 2: Mukkiyamaana '/error' path-ai permit seigirom
+                        .requestMatchers("/", "/error", "/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
@@ -46,7 +46,6 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // FIX SENJUIRUKEN: 'setAllowedOriginPatterns' use seiyungal
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:4200",
                 "*"
