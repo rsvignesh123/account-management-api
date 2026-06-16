@@ -26,11 +26,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Unga corsConfigurationSource Bean-ai inge connect seiyungal
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 2. Testing-kaga '/' (root URL) matrum auth-ai permit pannunga
+                        // Root URL '/' permit aagi iruppathaal ippo live link click seithaal 401 varathu
                         .requestMatchers("/", "/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -46,10 +45,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 3. Localhost matrum unga frontend deployed URL-aiyum sethukonunga
-        configuration.setAllowedOrigins(List.of(
+        // FIX SENJUIRUKEN: 'setAllowedOriginPatterns' use seiyungal
+        configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:4200",
-                "*" // Unga deployed frontend URL
+                "*"
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
