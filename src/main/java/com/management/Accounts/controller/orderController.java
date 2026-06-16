@@ -62,10 +62,11 @@ public class orderController {
     }
     @GetMapping("/test-mail")
     public String testMail() {
+        List<String> recipients = List.of("rajanveerapalam@gmail.com");
+        System.out.println("Sending reminder mail to: " + recipients);
+        emailService.sendReminderMail(recipients);
 
-        emailService.sendReminderMail(
-                List.of("Arumai Masala")
-        );
+
 
         return "Mail Sent";
     }
