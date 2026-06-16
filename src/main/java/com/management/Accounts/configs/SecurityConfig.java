@@ -28,8 +28,9 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                // anonymous() ஐ அனுமதிப்பதன் மூலம் லாகின் செய்யாத பயனர்களுக்கும் 403 வராது
+                .anonymous(anonymous -> anonymous.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Root URL '/' permit aagi iruppathaal ippo live link click seithaal 401 varathu
                         .requestMatchers("/", "/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
