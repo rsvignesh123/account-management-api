@@ -15,44 +15,44 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 @Service
-    public class EmailService {
+public class EmailService {
+
     @Value("${SENDGRID_API_KEY}")
     private String apiKey;
 
     @Value("${MAIL_FROM}")
     private String fromEmail;
-        @Autowired
-        private JavaMailSender mailSender;
-        public void sendReminderMail(List<String> companies) {
 
-            StringBuilder body = new StringBuilder();
-            body.append("The following companies have not placed orders:\n\n");
+    public void sendReminderMail(List<String> companies) {
 
-            for (String company : companies) {
-                body.append("- ").append(company).append("\n");
-            }
+        StringBuilder body = new StringBuilder();
+        body.append("The following companies have not placed orders:\n\n");
 
-            Email from = new Email(fromEmail);
-            Email to = new Email(fromEmail); // or admin email
+        for (String company : companies) {
+            body.append("- ").append(company).append("\n");
+        }
 
-            Content content = new Content("text/plain", body.toString());
-            Mail mail = new Mail(from, "Order Reminder", to, content);
+        Email from = new Email(fromEmail);
+        Email to = new Email("rajanveerapalam@gmail.com"); // or dynamic
 
-            SendGrid sg = new SendGrid(apiKey);
-            Request request = new Request();
+        Content content = new Content("text/plain", body.toString());
+        Mail mail = new Mail(from, "Order Reminder", to, content);
 
-            try {
-                request.setMethod(Method.POST);
-                request.setEndpoint("mail/send");
-                request.setBody(mail.build());
+        SendGrid sg = new SendGrid(apiKey);
+        Request request = new Request();
 
-                sg.api(request);
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
 
-                System.out.println("Email sent successfully ✔");
+            sg.api(request);
 
-            } catch (IOException e) {
-                System.out.println("Email failed: " + e.getMessage());
-            }
+            System.out.println("Email sent successfully ✔");
+
+        } catch (IOException e) {
+            System.out.println("Email failed: " + e.getMessage());
         }
     }
+}
 
