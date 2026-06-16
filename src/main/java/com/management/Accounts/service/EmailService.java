@@ -33,7 +33,7 @@ public class EmailService {
         }
 
         Email from = new Email(fromEmail);
-        Email to = new Email("rajanveerapalam@gmail.com"); // or dynamic
+        Email to = new Email("vigneshuvari@gmail.com"); // or dynamic
 
         Content content = new Content("text/plain", body.toString());
         Mail mail = new Mail(from, "Order Reminder", to, content);
