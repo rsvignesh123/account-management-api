@@ -24,17 +24,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http) throws Exception {
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> {})
+                // 1. Unga corsConfigurationSource Bean-ai inge connect seiyungal
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated()
+                        // 2. Testing-kaga '/' (root URL) matrum auth-ai permit pannunga
+                        .requestMatchers("/", "/api/auth/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(
                         jwtFilter,
@@ -43,27 +41,23 @@ public class SecurityConfig {
 
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(
-                List.of("http://localhost:4200"));
+        // 3. Localhost matrum unga frontend deployed URL-aiyum sethukonunga
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "*" // Unga deployed frontend URL
+        ));
 
-        configuration.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        configuration.setAllowedHeaders(
-                List.of("*"));
-
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }
