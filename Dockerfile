@@ -18,4 +18,4 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 # IMPORTANT: use Render PORT
-ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=$PORT"]
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=$PORT --   server.address=0.0.0.0"]
