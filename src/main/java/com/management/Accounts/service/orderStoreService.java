@@ -4,10 +4,11 @@ import com.management.Accounts.DTO.OrderItemRequest;
 import com.management.Accounts.entity.orderStoreModel;
 import com.management.Accounts.repository.orderStoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-
+@Service
 public class orderStoreService {
     @Autowired
     orderStoreRepository repository;
