@@ -1,5 +1,7 @@
 package com.management.Accounts.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.management.Accounts.entity.companyProfileModel;
 import com.management.Accounts.repository.companyProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class companyProfileService {
@@ -19,8 +22,9 @@ public class companyProfileService {
     @Autowired
     private companyProfileRepository repository;
 
+    @Autowired
+    private Cloudinary cloudinary;
 
-    private final String uploadPath = "uploads/";
 
 
     public companyProfileModel saveCompany(
@@ -28,39 +32,24 @@ public class companyProfileService {
             MultipartFile logo
     ) throws IOException {
 
+        if (logo != null && !logo.isEmpty()) {
 
-        if(logo != null && !logo.isEmpty()){
-
-            Files.createDirectories(
-                    Paths.get(uploadPath)
+            Map uploadResult = cloudinary.uploader().upload(
+                    logo.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "company-logo",
+                            "resource_type", "auto"
+                    )
             );
 
+            String fileUrl = uploadResult.get("secure_url").toString();
 
-            String fileName =
-                    System.currentTimeMillis()
-                            +"_"+logo.getOriginalFilename();
-
-
-            Path path =
-                    Paths.get(uploadPath + fileName);
-
-
-            Files.write(
-                    path,
-                    logo.getBytes()
-            );
-
-
-            company.setLogoPath(
-                    "/uploads/"+fileName
-            );
+            company.setLogoPath(fileUrl);
         }
 
-
         return repository.save(company);
+
     }
-
-
 
     public List<companyProfileModel> getCompany(){
 
@@ -104,30 +93,19 @@ public class companyProfileService {
 
 
         // update logo only if new logo uploaded
-        if(logo != null && !logo.isEmpty()){
+        if (logo != null && !logo.isEmpty()) {
 
-
-            Files.createDirectories(
-                    Paths.get(uploadPath)
+            Map uploadResult = cloudinary.uploader().upload(
+                    logo.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "company-logo",
+                            "resource_type", "auto"
+                    )
             );
 
+            String fileUrl = uploadResult.get("secure_url").toString();
 
-            String fileName =
-                    System.currentTimeMillis()
-                            + "_"
-                            + logo.getOriginalFilename();
-
-
-            Files.write(
-                    Paths.get(uploadPath + fileName),
-                    logo.getBytes()
-            );
-
-
-            existing.setLogoPath(
-                    "/uploads/" + fileName
-            );
-
+            existing.setLogoPath(fileUrl);
         }
 
 
