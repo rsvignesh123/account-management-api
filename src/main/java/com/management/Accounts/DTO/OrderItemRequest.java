@@ -1,19 +1,32 @@
 package com.management.Accounts.DTO;
 
+import java.math.BigDecimal;
+
 public class OrderItemRequest {
 
-    private Long productId;
+    public String getProduct() {
+        return product;
+    }
+
+    public void setProduct(String product) {
+        this.product = product;
+    }
+
+    private String product;
     private Double quantity;
     private String scale;
     private Double price;
 
-    public Long getProductId() {
-        return productId;
+    public BigDecimal getTotal() {
+        return total;
     }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
+    public void setTotal(BigDecimal total) {
+        this.total = total;
     }
+
+    private BigDecimal total;
+
 
     public Double getQuantity() {
         return quantity;

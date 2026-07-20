@@ -31,7 +31,7 @@ public class SecurityConfig {
                 // FIX 1: Anonymous-ai disable seiya koodathu! Spring-aiye athan pokkil vida vendum.
                 .authorizeHttpRequests(auth -> auth
                         // FIX 2: Mukkiyamaana '/error' path-ai permit seigirom
-                        .requestMatchers("/", "/error", "/api/auth/**").permitAll()
+                        .requestMatchers("/", "/error", "/api/auth/**","/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
@@ -40,7 +40,7 @@ public class SecurityConfig {
                 );
 
         return http.build();
-    }
+    }   
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -51,7 +51,7 @@ public class SecurityConfig {
                 "*"
         ));
 
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

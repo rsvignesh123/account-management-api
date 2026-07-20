@@ -25,7 +25,8 @@ public class JwtFilter extends OncePerRequestFilter {
 //
 //        String path = request.getServletPath();
 //
-//        return path.startsWith("/api/auth");
+//        return path.startsWith("/api/auth")
+//                || path.startsWith("/api/ws");
 //    }
 
     @Override
@@ -34,7 +35,12 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
+        String path = request.getRequestURI();
 
+        if (path.startsWith("/ws")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         // 1. Allow CORS preflight requests
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);

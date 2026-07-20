@@ -2,7 +2,7 @@ package com.management.Accounts.service;
 
 import com.management.Accounts.entity.customerModel;
 import com.management.Accounts.repository.customerRepository;
-import com.management.Accounts.repository.orderRepository;
+import com.management.Accounts.repository.orderStoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 public class scheduleService {
     @Autowired
-    private orderRepository orderRepo;
+    private orderStoreRepository orderRepo;
 
     @Autowired
     private customerRepository customerRepo;
@@ -33,11 +33,10 @@ public class scheduleService {
 
         for (customerModel customer : customers) {
 
-            boolean hasRecentOrder =
-                    orderRepo.existsByOrderCompanyNameAndOrderDateAfter(
-                            customer.getCompanyName(),
-                            tenDaysAgo
-                    );
+            boolean hasRecentOrder = orderRepo.existsByCompanyNameAndOrderDateAfter(
+                    customer.getCompanyName(),
+                    tenDaysAgo
+            );
 
             if (!hasRecentOrder) {
                 inactiveCompanies.add(customer.getCompanyName());

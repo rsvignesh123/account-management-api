@@ -52,4 +52,15 @@ public class customerController {
         System.out.println(id);
 return service.updateCustomer(id,mango);
     }
+    @GetMapping("/company/{companyName}")
+    public customerModel getCustomerByCompanyName(@PathVariable String companyName) {
+        return service.findByCompanyName(companyName);
+    }
+    @PostMapping("/optimize-route")
+    public List<customerModel> optimizeRoute(
+            @RequestBody List<customerModel> customers){
+
+        return service.optimize(customers);
+
+    }
 }

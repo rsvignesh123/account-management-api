@@ -3,7 +3,7 @@ package com.management.Accounts.controller;
 import com.management.Accounts.entity.LoginRequest;
 import com.management.Accounts.entity.User;
 
-import com.management.Accounts.repository.UserRepository;
+
 
 import com.management.Accounts.security.JwtUtil;
 import com.management.Accounts.service.authService;
@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
 public class loginController {
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -31,9 +30,12 @@ public class loginController {
     public ResponseEntity<?> login(
             @RequestBody LoginRequest request) {
 
+        System.out.println("Username = " + request.getUsername());
+        System.out.println("Password = " + request.getPassword());
         Optional<User> user =
                 AuthService.findByUsername(
                         request.getUsername());
+        System.out.println("User found = " + user.isPresent());
 
         if (user.isEmpty()) {
             return ResponseEntity.badRequest()

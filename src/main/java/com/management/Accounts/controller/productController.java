@@ -1,6 +1,7 @@
 
 package com.management.Accounts.controller;
 
+
 import com.management.Accounts.entity.productModel;
 import com.management.Accounts.service.productService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,5 +52,9 @@ public class  productController {
     {
         System.out.println(id);
         return service.updateProduct(id,product);
+    }
+    @GetMapping("/product/{productName}")
+    public productModel getCustomerByCompanyName(@PathVariable String productName) {
+        return service.findByProductName(productName);
     }
 }

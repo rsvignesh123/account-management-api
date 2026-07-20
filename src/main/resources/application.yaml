@@ -10,3 +10,6 @@ spring:
 server:
   port: ${PORT}
   address: 0.0.0.0
+
+file:
+  upload-dir: uploads/
