@@ -80,9 +80,14 @@ public class orderStoreController {
         byte[] pdf = orderService.generatePdf(id);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=Order_Report.pdf")
-                .contentType(MediaType.APPLICATION_PDF)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"Order_Report.pdf\""
+                )
+                .header(
+                        HttpHeaders.CONTENT_TYPE,
+                        MediaType.APPLICATION_PDF_VALUE
+                )
                 .body(pdf);
     }
    }
