@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.math.BigDecimal;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -284,11 +285,21 @@ public class orderStoreService {
 
             if(company != null && company.getLogoPath()!=null){
 
-                String logoPath = System.getProperty("user.dir")
-                        + company.getLogoPath();
+                Image logo;
 
+                if(company.getLogoPath().startsWith("http")){
 
-                Image logo = Image.getInstance(logoPath);
+                    logo = Image.getInstance(
+                            new URL(company.getLogoPath())
+                    );
+
+                }else{
+
+                    String logoPath = System.getProperty("user.dir")
+                            + company.getLogoPath();
+
+                    logo = Image.getInstance(logoPath);
+                }
 
                 logo.scaleToFit(80,80);
 
