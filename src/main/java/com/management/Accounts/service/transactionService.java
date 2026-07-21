@@ -26,28 +26,55 @@ public class transactionService {
     private MongoTemplate mongoTemplate;
     @Autowired
     private NotificationService notificationService;
-    public transactionModel saveTransactionData(transactionModel transaction) {
-        transactionModel data=repo.save(transaction);
+    public transactionModel saveTransactionData(
+            transactionModel transaction,
+            String tenantId
+    ) {
+
+        transaction.setTenantId(tenantId);
         transaction.setTransactionTime(LocalTime.now());
+
+        transactionModel data =
+                repo.save(transaction);
+
+
         notificationService.saveNotification(
                 "New Transaction",
-                data.getCompanyName() + "paid" + data.getAmount() + "successfully",
+                data.getCompanyName()
+                        + " paid "
+                        + data.getAmount()
+                        + " successfully",
                 "TRANSACTION",
                 "CREATE",
-                data.getId()
+                data.getId(),
+                tenantId
         );
+
+
         return data;
     }
 
-    public List<transactionModel> getAllTransaction() {
-        return repo.findAll();
+    public List<transactionModel> getAllTransaction(
+            String tenantId
+    ) {
+
+        return repo.findByTenantId(tenantId);
+
     }
 
-    public transactionModel updateTransaction(String id, transactionModel data) {
-        transactionModel old = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+    public transactionModel updateTransaction(
+            String id,
+            transactionModel data,
+            String tenantId
+    ) {
 
-        old.setId(id);   // <-- Add this
+
+        transactionModel old =
+                repo.findByIdAndTenantId(id, tenantId)
+                        .orElseThrow(
+                                () -> new RuntimeException("Transaction not found")
+                        );
+
 
         old.setCompanyName(data.getCompanyName());
         old.setTransactionMode(data.getTransactionMode());
@@ -56,26 +83,41 @@ public class transactionService {
         old.setAmount(data.getAmount());
         old.setCollectedPerson(data.getCollectedPerson());
         old.setRemarks(data.getRemarks());
-        transactionModel transaction=repo.save(old);
         old.setUpdatedAt(LocalDateTime.now());
+
+
+        transactionModel updated =
+                repo.save(old);
+
+
+
         notificationService.saveNotification(
                 "Update Transaction",
                 "transaction updated successfully",
                 "TRANSACTION",
-                "CREATE",
-                data.getId()
+                "UPDATE",
+                updated.getId(),
+                tenantId
         );
-        return transaction;
+
+
+        return updated;
+
     }
 
     public List<transactionModel> searchTransactions(
             String companyName,
             LocalDate transactionDate,
-            String collectedPerson) {
+            String collectedPerson,
+            String tenantId) {
 
         Query query = new Query();
-        List<Criteria> criteriaList = new ArrayList<>();
 
+        List<Criteria> criteriaList = new ArrayList<>();
+        criteriaList.add(
+                Criteria.where("tenantId")
+                        .is(tenantId)
+        );
         // Company Name
         if (companyName != null && !companyName.trim().isEmpty()) {
             criteriaList.add(
@@ -116,11 +158,15 @@ public class transactionService {
             String companyName,
             LocalDate transactionStartDate,
             LocalDate transactionEndDate,
-            String collectedPerson) {
+            String collectedPerson,
+            String tenantId) {
 
         Query query = new Query();
         List<Criteria> criteriaList = new ArrayList<>();
-
+        criteriaList.add(
+                Criteria.where("tenantId")
+                        .is(tenantId)
+        );
         // Company Name
         if (companyName != null && !companyName.trim().isEmpty()) {
             criteriaList.add(
@@ -172,16 +218,29 @@ public class transactionService {
 
         return mongoTemplate.find(query, transactionModel.class);
     }
-    public void deleteTransaction(String id) {
-        transactionModel transaction = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
-        repo.deleteById(id);
+    public void deleteTransaction(
+            String id,
+            String tenantId
+    ) {
+
+
+        transactionModel transaction =
+                repo.findByIdAndTenantId(id, tenantId)
+                        .orElseThrow(
+                                () -> new RuntimeException("Transaction not found")
+                        );
+
+
+        repo.delete(transaction);
+
+
         notificationService.saveNotification(
                 "Transaction Deleted",
-                " Transaction deleted.",
+                "Transaction deleted.",
                 "TRANSACTION",
                 "DELETE",
-                transaction.getId()
+                transaction.getId(),
+                tenantId
         );
 
     }

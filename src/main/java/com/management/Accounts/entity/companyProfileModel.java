@@ -14,7 +14,15 @@ public class companyProfileModel {
     private String id;
 
     private String ownerName;
+    public String getTenantId() {
+        return tenantId;
+    }
 
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    private String tenantId;
     public String getId() {
         return id;
     }

@@ -14,6 +14,7 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class companyProfileService {
@@ -32,6 +33,13 @@ public class companyProfileService {
             MultipartFile logo
     ) throws IOException {
 
+        Optional<companyProfileModel> existing =
+                repository.findByTenantId(company.getTenantId());
+
+        if (existing.isPresent()) {
+            throw new RuntimeException("Company Profile already exists");
+        }
+
         if (logo != null && !logo.isEmpty()) {
 
             Map uploadResult = cloudinary.uploader().upload(
@@ -42,57 +50,53 @@ public class companyProfileService {
                     )
             );
 
-            String fileUrl = uploadResult.get("secure_url").toString();
-
-            company.setLogoPath(fileUrl);
+            company.setLogoPath(
+                    uploadResult.get("secure_url").toString()
+            );
         }
 
         return repository.save(company);
-
     }
 
-    public List<companyProfileModel> getCompany(){
+    public companyProfileModel getCompany(String tenantId) {
 
-        return repository.findAll();
+        return repository.findByTenantId(tenantId)
+                .orElseThrow(() ->
+                        new RuntimeException("Company Profile not found"));
 
     }
-    public companyProfileModel getById(@PathVariable String id) {
-        return repository.findById(id).orElse(null);
-    }
+    public companyProfileModel getById(
+            String id,
+            String tenantId) {
 
+        return repository.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() ->
+                        new RuntimeException("Company Profile not found"));
+    }
 
     public companyProfileModel updateCompany(
             String id,
+            String tenantId,
             companyProfileModel data,
             MultipartFile logo
     ) throws IOException {
 
-
         companyProfileModel existing =
-                repository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Company not found"));
-
+                repository.findByIdAndTenantId(id, tenantId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Company not found"));
 
         existing.setOwnerName(data.getOwnerName());
-
         existing.setCompanyName(data.getCompanyName());
-
         existing.setTagline(data.getTagline());
-
         existing.setAddress(data.getAddress());
-
         existing.setCity(data.getCity());
-
         existing.setPincode(data.getPincode());
-
         existing.setEmail(data.getEmail());
-
         existing.setPhoneNumber(data.getPhoneNumber());
-
         existing.setGstNumber(data.getGstNumber());
 
-
-        // update logo only if new logo uploaded
+        // Update logo only if new logo uploaded
         if (logo != null && !logo.isEmpty()) {
 
             Map uploadResult = cloudinary.uploader().upload(
@@ -103,27 +107,22 @@ public class companyProfileService {
                     )
             );
 
-            String fileUrl = uploadResult.get("secure_url").toString();
-
-            existing.setLogoPath(fileUrl);
+            existing.setLogoPath(uploadResult.get("secure_url").toString());
         }
 
-
-        // system generated fields
         existing.setUpdatedAt(LocalDateTime.now());
 
-
-        companyProfileModel updatedCompany =
-                repository.save(existing);
-
-
-        return updatedCompany;
+        return repository.save(existing);
     }
 
+    public void delete(String id, String tenantId) {
 
-    public void delete(String id){
+        companyProfileModel company =
+                repository.findByIdAndTenantId(id, tenantId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Company Profile not found"));
 
-        repository.deleteById(id);
+        repository.delete(company);
 
     }
 

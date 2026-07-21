@@ -30,36 +30,44 @@ public class companyProfileController {
             @ModelAttribute companyProfileModel company,
 
             @RequestParam(
-                    value="logo",
-                    required=false
+                    value = "logo",
+                    required = false
             )
-            MultipartFile logo
+            MultipartFile logo,
+
+            @RequestHeader("tenantId") String tenantId
 
     ) throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
 
+        company.setTenantId(tenantId);
         company.setCreatedAt(now);
         company.setUpdatedAt(now);
-        return service.saveCompany(company,logo);
+
+        return service.saveCompany(company, logo);
 
     }
 
 
     @GetMapping
-    public List<companyProfileModel> get(){
+    public companyProfileModel get(
+            @RequestHeader("tenantId") String tenantId) {
 
-        return service.getCompany();
+        return service.getCompany(tenantId);
 
     }
 
     @GetMapping("/{id}")
-    public companyProfileModel getById(@PathVariable String id) {
-        return service.getById(id);
+    public companyProfileModel getById(
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId) {
+
+        return service.getById(id, tenantId);
     }
 
     @PutMapping(
-            value="/{id}",
+            value = "/{id}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public companyProfileModel update(
@@ -69,16 +77,18 @@ public class companyProfileController {
             @ModelAttribute companyProfileModel company,
 
             @RequestParam(
-                    value="logo",
-                    required=false
+                    value = "logo",
+                    required = false
             )
-            MultipartFile logo
+            MultipartFile logo,
+
+            @RequestHeader("tenantId") String tenantId
 
     ) throws Exception {
 
-
         return service.updateCompany(
                 id,
+                tenantId,
                 company,
                 logo
         );
@@ -89,11 +99,10 @@ public class companyProfileController {
 
     @DeleteMapping("/{id}")
     public void delete(
-            @PathVariable String id
-    ){
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId) {
 
-        service.delete(id);
+        service.delete(id, tenantId);
 
     }
-
 }

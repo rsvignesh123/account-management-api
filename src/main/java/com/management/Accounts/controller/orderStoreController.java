@@ -20,64 +20,139 @@ public class orderStoreController {
     @Autowired
     private orderStoreService orderService;
 
+
     @PostMapping
-    public orderStoreModel createOrder(@RequestBody orderStoreModel request) {
+    public orderStoreModel createOrder(
+            @RequestBody orderStoreModel request,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
         LocalDateTime now = LocalDateTime.now();
 
+        request.setTenantId(tenantId);
         request.setCreatedAt(now);
         request.setUpdatedAt(now);
 
-       return orderService.saveStoreOrder(request);
-
+        return orderService.saveStoreOrder(request);
     }
+
+
+
     @GetMapping
-    public List<orderStoreModel> getOrder()
-    {
-        return orderService.getAllStoreOrder();
-    }
-    @GetMapping("/{id}")
-    public orderStoreModel getById(@PathVariable String id) {
-        return orderService.getById(id);
-    }
-    @PutMapping("/{id}")
-    public orderStoreModel updateStoreOrder(@PathVariable String id, @RequestBody orderStoreModel mango)
-    {
+    public List<orderStoreModel> getOrder(
+            @RequestHeader("tenantId") String tenantId
+    ) {
 
-        return orderService.updateStoreOrder(id,mango);
+        return orderService.getAllStoreOrder(tenantId);
     }
+
+
+
+    @GetMapping("/{id}")
+    public orderStoreModel getById(
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        return orderService.getById(id, tenantId);
+    }
+
+
+
+    @PutMapping("/{id}")
+    public orderStoreModel updateStoreOrder(
+            @PathVariable String id,
+            @RequestBody orderStoreModel mango,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        return orderService.updateStoreOrder(
+                id,
+                mango,
+                tenantId
+        );
+    }
+
+
+
     @DeleteMapping("/{id}")
-    public void deleteStoreOrder(@PathVariable String id)
-    {
-        orderService.deleteStoreOrder(id);
+    public void deleteStoreOrder(
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        orderService.deleteStoreOrder(id, tenantId);
     }
+
+
+
     @PatchMapping("/{id}/status")
     public orderStoreModel updateStatus(
             @PathVariable String id,
-            @RequestParam String status) {
+            @RequestParam String status,
+            @RequestHeader("tenantId") String tenantId
+    ) {
 
-        return orderService.updateStatus(id, status);
+        return orderService.updateStatus(
+                id,
+                status,
+                tenantId
+        );
     }
+
+
+
+
     @GetMapping("/search")
     public List<orderStoreModel> searchOrders(
             @RequestParam(required = false) String companyName,
             @RequestParam(required = false) LocalDate orderDate,
-            @RequestParam(required = false) String orderStatus) {
+            @RequestParam(required = false) String orderStatus,
+            @RequestHeader("tenantId") String tenantId
+    ) {
 
-        return orderService.searchOrders(companyName,orderDate,orderStatus);
+        return orderService.searchOrders(
+                companyName,
+                orderDate,
+                orderStatus,
+                tenantId
+        );
     }
-        @GetMapping("/searchRange")
-        public List<orderStoreModel> searchOrdersRange(
-                @RequestParam(required = false) String companyName,
-                @RequestParam(required = false) LocalDate orderStartDate,
-                @RequestParam(required = false) LocalDate orderEndDate,
-                @RequestParam(required = false) String orderStatus) {
-    
-            return orderService.searchOrdersRange(companyName,orderStartDate,orderEndDate,orderStatus);
-        }
-    @GetMapping("/download/{id}")
-    public ResponseEntity<byte[]> download(@PathVariable String id){
 
-        byte[] pdf = orderService.generatePdf(id);
+
+
+
+
+    @GetMapping("/searchRange")
+    public List<orderStoreModel> searchOrdersRange(
+            @RequestParam(required = false) String companyName,
+            @RequestParam(required = false) LocalDate orderStartDate,
+            @RequestParam(required = false) LocalDate orderEndDate,
+            @RequestParam(required = false) String orderStatus,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        return orderService.searchOrdersRange(
+                companyName,
+                orderStartDate,
+                orderEndDate,
+                orderStatus,
+                tenantId
+        );
+    }
+
+
+
+
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> download(
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId
+    ){
+
+        byte[] pdf =
+                orderService.generatePdf(id, tenantId);
+
 
         return ResponseEntity.ok()
                 .header(
@@ -90,4 +165,5 @@ public class orderStoreController {
                 )
                 .body(pdf);
     }
-   }
+
+}

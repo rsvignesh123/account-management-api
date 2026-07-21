@@ -54,37 +54,46 @@ public class orderStoreService {
             BigDecimal itemTotal = BigDecimal.valueOf(item.getPrice())
                     .multiply(BigDecimal.valueOf(item.getQuantity()));
 
-            // Set item total
             item.setTotal(itemTotal);
 
-            // Add to grand total
             grandTotal = grandTotal.add(itemTotal);
         }
 
         order.setTotalAmount(grandTotal);
-        order.setBillNumber(generateBillNumber());
+        order.setBillNumber(generateBillNumber(order.getTenantId()));
+
         orderStoreModel savedOrder = repository.save(order);
+
+
         notificationService.saveNotification(
                 "New Order",
                 savedOrder.getBillNumber() + " order added successfully.",
                 "ORDER",
                 "CREATE",
-                savedOrder.getId()
+                savedOrder.getId(),
+                savedOrder.getTenantId()
         );
+
+
         return savedOrder;
-
     }
-    public List<orderStoreModel> getAllStoreOrder()
+    public List<orderStoreModel> getAllStoreOrder(String tenantId)
     {
-        return repository.findAllByOrderByOrderDateDescCreatedAtAsc();
+        return repository.findByTenantIdOrderByOrderDateDescCreatedAtAsc(tenantId);
     }
-    public orderStoreModel getById(String id) {
-        return repository.findById(id).orElse(null);
+    public orderStoreModel getById(
+            String id,
+            String tenantId
+    )
+    {
+        return repository.findByIdAndTenantId(id,tenantId)
+                .orElse(null);
     }
 
-    public orderStoreModel updateStoreOrder(String id, orderStoreModel newData) {
-        orderStoreModel existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+    public orderStoreModel updateStoreOrder(String id, orderStoreModel newData,String tenantId) {
+        orderStoreModel existing =
+                repository.findByIdAndTenantId(id,tenantId)
+                        .orElseThrow();
         BigDecimal grandTotal = BigDecimal.ZERO;
 
         for (OrderItemRequest item : newData.getItems()) {
@@ -107,51 +116,65 @@ public class orderStoreService {
             orderStoreModel updatedOrder = repository.save(existing);
             notificationService.saveNotification(
                     "Order Updated",
-                    updatedOrder.getBillNumber() + " order updated.",
+                    updatedOrder.getBillNumber()+" order updated.",
                     "ORDER",
                     "UPDATE",
-                    updatedOrder.getId()
+                    updatedOrder.getId(),
+                    tenantId
             );
             return updatedOrder;
         }
         return null;
     }
-    public void deleteStoreOrder(String id)
+    public void deleteStoreOrder(
+            String id,
+            String tenantId
+    )
     {
-        orderStoreModel order = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-        repository.deleteById(id);
-        String billNo = order.getBillNumber() != null
-                ? order.getBillNumber()
-                : "Unknown Bill";
+
+        orderStoreModel order =
+                repository.findByIdAndTenantId(id,tenantId)
+                        .orElseThrow(
+                                () -> new RuntimeException("Order not found")
+                        );
+
+
+        repository.delete(order);
+
+
         notificationService.saveNotification(
                 "Order Deleted",
-                 "order" +billNo +"deleted.",
+                order.getBillNumber()+" order deleted.",
                 "ORDER",
                 "DELETE",
-                order.getId()
+                order.getId(),
+                tenantId
         );
     }
-    public orderStoreModel updateStatus(String id, String status) {
+    public orderStoreModel updateStatus(String id, String status,String tenantId) {
 
         orderStoreModel order = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         order.setOrderStatus(status);
         notificationService.saveNotification(
-                "Order Straus Updated",
-                order.getBillNumber() + "status has been changed to" +order.getOrderStatus(),
+                "Order Status Updated",
+                order.getBillNumber()+" status changed to "+status,
                 "ORDER",
                 "STATUS",
-                order.getId()
+                order.getId(),
+                tenantId
         );
         return repository.save(order);
     }
-    public List<orderStoreModel> searchOrders(String companyName, LocalDate orderDate,String orderStatus) {
+    public List<orderStoreModel> searchOrders(String companyName, LocalDate orderDate,String orderStatus,String tenantId) {
 
 
         Query query = new Query();
-
+        query.addCriteria(
+                Criteria.where("tenantId")
+                        .is(tenantId)
+        );
         if (companyName != null && !companyName.isBlank()) {
             query.addCriteria(
                     Criteria.where("companyName")
@@ -179,9 +202,14 @@ public class orderStoreService {
             String companyName,
             LocalDate orderStartDate,
             LocalDate orderEndDate,
-            String orderStatus) {
+            String orderStatus,
+            String tenantId) {
 
         Query query = new Query();
+        query.addCriteria(
+                Criteria.where("tenantId")
+                        .is(tenantId)
+        );
         List<Criteria> criteriaList = new ArrayList<>();
 
         // Company Name
@@ -224,31 +252,38 @@ public class orderStoreService {
 
         return mongoTemplate.find(query, orderStoreModel.class);
     }
-    private String generateBillNumber() {
+    private String generateBillNumber(String tenantId) {
 
         Optional<orderStoreModel> lastOrder =
-                repository.findTopByOrderByBillNumberDesc();
+                repository.findTopByTenantIdOrderByBillNumberDesc(tenantId);
+
 
         if (lastOrder.isEmpty()) {
             return "BILL000001";
         }
 
-        String lastBill = lastOrder.get().getBillNumber(); // BILL000123
 
-        int number = Integer.parseInt(lastBill.replace("BILL", ""));
+        String lastBill = lastOrder.get().getBillNumber();
 
-        return String.format("BILL%06d", number + 1);
+
+        int number = Integer.parseInt(
+                lastBill.replace("BILL", "")
+        );
+
+
+        return String.format(
+                "BILL%06d",
+                number + 1
+        );
     }
-    public byte[] generatePdf(String id) {
+    public byte[] generatePdf(String id, String tenantId) {
 
-        orderStoreModel order = repository.findById(id)
+        orderStoreModel order = repository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new RuntimeException("Order Not Found"));
 
 
         companyProfileModel company =
-                companyRepository.findAll()
-                        .stream()
-                        .findFirst()
+                companyRepository.findByTenantId(tenantId)
                         .orElse(null);
 
 

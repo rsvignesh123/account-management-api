@@ -13,11 +13,14 @@ public class NotificationSocketService {
         this.messagingTemplate = messagingTemplate;
     }
     public void send(NotificationModel notification){
+
         System.out.println(
                 "Sending WebSocket : " + notification.getMessage()
         );
+
+
         messagingTemplate.convertAndSend(
-                "/topic/notifications",
+                "/topic/notifications/" + notification.getTenantId(),
                 notification
         );
 

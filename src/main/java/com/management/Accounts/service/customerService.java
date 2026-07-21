@@ -16,61 +16,90 @@ public class customerService {
     private customerRepository repo;
     @Autowired
     private NotificationService notificationService;
-    public customerModel saveCustomer(customerModel customer)
-    {
+    public customerModel saveCustomer(customerModel customer) {
+
         customerModel savedCustomer = repo.save(customer);
+
         notificationService.saveNotification(
                 "New Customer",
                 savedCustomer.getCompanyName() + " customer added successfully.",
                 "CUSTOMER",
                 "CREATE",
-                savedCustomer.getId()
+                savedCustomer.getId(),
+                savedCustomer.getTenantId()
         );
-        return  savedCustomer;
+
+        return savedCustomer;
     }
-    public List<customerModel> getAllCustomers() {
-        return repo.findAll();
+    public List<customerModel> getAllCustomers(String tenantId) {
+        return repo.findByTenantId(tenantId);
     }
-    public customerModel getById(String id) {
-        return repo.findById(id).orElse(null);
+    public customerModel getById(String id, String tenantId) {
+
+        return repo.findByIdAndTenantId(id, tenantId)
+                .orElse(null);
     }
 
     // Delete
-    public void deleteCustomer(String id) {
-        customerModel customer = repo.findById(id)
+    public void deleteCustomer(String id, String tenantId) {
+
+        customerModel customer = repo.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        repo.deleteById(id);
+        repo.delete(customer);
 
         notificationService.saveNotification(
                 "Customer Deleted",
                 customer.getCompanyName() + " customer deleted.",
                 "CUSTOMER",
                 "DELETE",
-                customer.getId()
+                customer.getId(),
+                tenantId
         );
     }
-    public customerModel updateCustomer(String id, customerModel customer) {
-        customer.setId(id);
+    public customerModel updateCustomer(
+            String id,
+            customerModel customer,
+            String tenantId) {
 
-        customerModel updatedCustomer = repo.save(customer);
+        customerModel existing = repo.findByIdAndTenantId(id, tenantId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        existing.setCustomerName(customer.getCustomerName());
+        existing.setCompanyName(customer.getCompanyName());
+        existing.setMobilenumber(customer.getMobilenumber());
+        existing.setCity(customer.getCity());
+        existing.setType(customer.getType());
+        existing.setLatitude(customer.getLatitude());
+        existing.setLongitude(customer.getLongitude());
+
+
+
+        customerModel updatedCustomer = repo.save(existing);
 
         notificationService.saveNotification(
                 "Customer Updated",
                 updatedCustomer.getCompanyName() + " customer updated.",
                 "CUSTOMER",
                 "UPDATE",
-                updatedCustomer.getId()
+                updatedCustomer.getId(),
+                tenantId
         );
 
         return updatedCustomer;
     }
-    public customerModel findByCompanyName(String companyName) {
-        System.out.println("Searching : " + companyName);
+    public customerModel findByCompanyName(
+            String companyName,
+            String tenantId) {
 
-        System.out.println("All Customers : " + repo.findAll());
-        return repo.findByCompanyName(companyName)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        System.out.println("Searching : " + companyName);
+        System.out.println("Tenant : " + tenantId);
+
+        return repo.findByCompanyNameAndTenantId(
+                companyName,
+                tenantId
+        ).orElseThrow(() ->
+                new RuntimeException("Customer not found"));
     }
     public List<customerModel> optimize(List<customerModel> customers){
 

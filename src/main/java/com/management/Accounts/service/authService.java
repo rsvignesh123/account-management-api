@@ -12,11 +12,40 @@ public class authService {
     @Autowired
     private UserRepository userRepository;
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+
+
+
+
+
+    public Optional<User> findByUsername(
+            String username
+    ) {
+
+        return userRepository
+                .findByUsername(username);
     }
 
+
+
+    public Optional<User> findByUsernameAndTenantId(
+            String username,
+            String tenantId
+    ){
+
+        return userRepository
+                .findByUsernameAndTenantId(
+                        username,
+                        tenantId
+                );
+
+    }
+
+
+
     public User save(User user) {
+
+
         return userRepository.save(user);
+
     }
 }

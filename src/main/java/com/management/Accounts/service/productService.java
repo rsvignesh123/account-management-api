@@ -18,60 +18,128 @@ public class productService {
     @Autowired
     private NotificationService notificationService;
 
-    public productModel saveProduct(productModel product)
-    {
-        productModel savedProduct = repo.save(product);
+    public productModel saveProduct(
+            productModel product
+    ) {
+
+        productModel savedProduct =
+                repo.save(product);
+
+
         notificationService.saveNotification(
                 "New Product",
-                savedProduct.getProductName() + " product added successfully.",
+                savedProduct.getProductName()
+                        + " product added successfully.",
                 "PRODUCT",
                 "CREATE",
-                savedProduct.getId()
+                savedProduct.getId(),
+                savedProduct.getTenantId()
         );
 
-        return  savedProduct;
+
+        return savedProduct;
     }
-    public List<productModel> getAllProducts() {
-        return repo.findAll();
+    public List<productModel> getAllProducts(
+            String tenantId
+    ) {
+
+        return repo.findByTenantId(tenantId);
+
     }
-    public productModel getById(String id) {
-        return repo.findById(id).orElse(null);
+    public productModel getById(
+            String id,
+            String tenantId
+    ) {
+
+        return repo.findByIdAndTenantId(id, tenantId)
+                .orElse(null);
+
     }
 
     // Delete
-    public void deleteCustomer(String id) {
-        productModel product = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    public void deleteProduct(
+            String id,
+            String tenantId
+    ) {
 
-        repo.deleteById(id);
+
+        productModel product =
+                repo.findByIdAndTenantId(id, tenantId)
+                        .orElseThrow(
+                                () -> new RuntimeException("Product not found")
+                        );
+
+
+        repo.delete(product);
+
+
 
         notificationService.saveNotification(
                 "Product Deleted",
-                product.getProductName() + " product deleted.",
+                product.getProductName()
+                        + " product deleted.",
                 "PRODUCT",
                 "DELETE",
-                product.getId()
+                product.getId(),
+                tenantId
         );
-    }
-    public productModel findByProductName(String productName) {
-        System.out.println("Searching : " + productName);
 
-        System.out.println("All Products : " + repo.findAll());
-        return repo.findByProductName(productName)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
     }
-    public productModel updateProduct(String id, productModel product) {
-        product.setId(id);
-        productModel updatedProduct = repo.save(product);
+
+    public productModel findByProductName(
+            String productName,
+            String tenantId
+    ) {
+
+
+        return repo.findByProductNameAndTenantId(
+                        productName,
+                        tenantId
+                )
+                .orElseThrow(
+                        () -> new RuntimeException("Product not found")
+                );
+
+    }
+    public productModel updateProduct(
+            String id,
+            productModel product,
+            String tenantId
+    ) {
+
+
+        productModel existing =
+                repo.findByIdAndTenantId(id, tenantId)
+                        .orElseThrow(
+                                () -> new RuntimeException("Product not found")
+                        );
+
+
+        existing.setProductName(product.getProductName());
+        existing.setPrice(product.getPrice());
+
+
+
+        productModel updatedProduct =
+                repo.save(existing);
+
+
 
         notificationService.saveNotification(
                 "Product Updated",
-                updatedProduct.getProductName() + " product updated.",
+                updatedProduct.getProductName()
+                        + " product updated.",
                 "PRODUCT",
                 "UPDATE",
-                updatedProduct.getId()
+                updatedProduct.getId(),
+                tenantId
         );
+
+
         return updatedProduct;
+
     }
+
+
 
 }

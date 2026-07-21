@@ -17,47 +17,59 @@ public class NotificationController {
         this.service = service;
     }
 
-    @GetMapping
-    public List<NotificationModel> getAll() {
 
-        return service.getAll();
+    @GetMapping
+    public List<NotificationModel> getAll(
+            @RequestHeader("tenantId") String tenantId) {
+
+        return service.getAll(tenantId);
 
     }
+
 
     @GetMapping("/count")
-    public long unreadCount() {
+    public long unreadCount(
+            @RequestHeader("tenantId") String tenantId) {
 
-        return service.unreadCount();
+        return service.unreadCount(tenantId);
 
     }
+
 
     @PutMapping("/{id}/read")
     public void markRead(
-            @PathVariable String id) {
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId) {
 
-        service.markRead(id);
+        service.markRead(id, tenantId);
 
     }
+
 
     @PutMapping("/read-all")
-    public void markAllRead() {
+    public void markAllRead(
+            @RequestHeader("tenantId") String tenantId) {
 
-        service.markAllRead();
+        service.markAllRead(tenantId);
 
     }
+
 
     @DeleteMapping("/{id}")
     public void delete(
-            @PathVariable String id) {
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId) {
 
-        service.delete(id);
+        service.delete(id, tenantId);
 
     }
 
-    @DeleteMapping
-    public void clearAll() {
 
-        service.clearAll();
+    @DeleteMapping
+    public void clearAll(
+            @RequestHeader("tenantId") String tenantId) {
+
+        service.clearAll(tenantId);
 
     }
 

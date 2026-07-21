@@ -15,26 +15,32 @@ import java.util.List;
 public class customerController {
 
     @Autowired
-    private customerService service;    
+    private customerService service;
 
     @PostMapping
-    public customerModel create(@RequestBody customerModel mango)
-    {
-        return service.saveCustomer(mango);
+    public customerModel create(
+            @RequestBody customerModel customer,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        customer.setTenantId(tenantId);
+
+        return service.saveCustomer(customer);
     }
 
     @GetMapping
-    public List<customerModel> getAll() {
-        return service.getAllCustomers();
+    public List<customerModel> getAll(@RequestHeader("tenantId") String tenantId) {
+        return service.getAllCustomers(tenantId);
     }
     @GetMapping("/{id}")
-    public customerModel getById(@PathVariable String id) {
-        return service.getById(id);
+    public customerModel getById(@PathVariable String id,
+                                 @RequestHeader("tenantId") String tenantId) {
+        return service.getById(id,tenantId);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable String id) {
+    public ResponseEntity<String> delete(@PathVariable String id,@RequestHeader("tenantId") String tenantId) {
 
-        customerModel customer = service.getById(id);
+        customerModel customer = service.getById(id,tenantId);
 
         if (customer == null) {
             return ResponseEntity
@@ -42,19 +48,25 @@ public class customerController {
                     .body("Customer not found");
         }
 
-        service.deleteCustomer(id);
+        service.deleteCustomer(id,tenantId);
 
         return ResponseEntity.ok("Deleted Successfully");
     }
     @PutMapping("/{id}")
-    public customerModel updateCustomer(@PathVariable String id, @RequestBody customerModel mango)
-    {
-        System.out.println(id);
-return service.updateCustomer(id,mango);
+    public customerModel updateCustomer(
+            @PathVariable String id,
+            @RequestBody customerModel customer,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        return service.updateCustomer(id, customer, tenantId);
     }
     @GetMapping("/company/{companyName}")
-    public customerModel getCustomerByCompanyName(@PathVariable String companyName) {
-        return service.findByCompanyName(companyName);
+    public customerModel getCustomerByCompanyName(
+            @PathVariable String companyName,
+            @RequestHeader("tenantId") String tenantId) {
+
+        return service.findByCompanyName(companyName, tenantId);
     }
     @PostMapping("/optimize-route")
     public List<customerModel> optimizeRoute(

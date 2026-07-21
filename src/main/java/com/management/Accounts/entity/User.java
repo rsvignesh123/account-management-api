@@ -11,7 +11,26 @@ public class User {
 
     private String username;
     private String password;
+    private String role;
+    // ADMIN / USER
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    private String tenantId;
     public String getId() {
         return id;
     }

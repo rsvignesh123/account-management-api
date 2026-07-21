@@ -15,7 +15,15 @@ public class orderStoreModel {
     public String getBillNumber() {
         return billNumber;
     }
+    public String getTenantId() {
+        return tenantId;
+    }
 
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    private String tenantId;
     public void setBillNumber(String billNumber) {
         this.billNumber = billNumber;
     }

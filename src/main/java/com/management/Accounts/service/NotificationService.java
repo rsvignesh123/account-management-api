@@ -17,13 +17,19 @@ public class NotificationService {
         this.repository = repository;
     }
 
+
     public void saveNotification(
             String title,
             String message,
             String type,
             String action,
-            String referenceId) {
+            String referenceId,
+            String tenantId
+    ) {
+
         System.out.println("Notification Created : " + message);
+
+
         NotificationModel notification =
                 new NotificationModel(
                         title,
@@ -33,55 +39,99 @@ public class NotificationService {
                         referenceId
                 );
 
-        NotificationModel saved = repository.save(notification);
 
-        // Send notification through WebSocket
+        notification.setTenantId(tenantId);
+
+
+        NotificationModel saved =
+                repository.save(notification);
+
+
         socketService.send(saved);
-    }
-
-    public List<NotificationModel> getAll() {
-
-        return repository.findAllByOrderByCreatedAtDesc();
 
     }
 
-    public long unreadCount() {
 
-        return repository.countByReadFalse();
+
+    public List<NotificationModel> getAll(String tenantId){
+
+        return repository
+                .findByTenantIdOrderByCreatedAtDesc(tenantId);
 
     }
 
-    public void markRead(String id) {
+
+
+    public long unreadCount(String tenantId){
+
+        return repository
+                .countByTenantIdAndReadFalse(tenantId);
+
+    }
+
+
+
+    public void markRead(
+            String id,
+            String tenantId
+    ) {
 
         NotificationModel model =
-                repository.findById(id).orElseThrow();
+                repository.findByIdAndTenantId(id, tenantId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Notification not found"));
+
 
         model.setRead(true);
+
 
         repository.save(model);
 
     }
 
-    public void markAllRead() {
+
+
+    public void markAllRead(
+            String tenantId
+    ) {
 
         List<NotificationModel> list =
-                repository.findAll();
+                repository.findByTenantId(tenantId);
 
-        list.forEach(x -> x.setRead(true));
+
+        list.forEach(x ->
+                x.setRead(true)
+        );
+
 
         repository.saveAll(list);
 
     }
 
-    public void delete(String id) {
 
-        repository.deleteById(id);
+
+    public void delete(
+            String id,
+            String tenantId
+    ) {
+
+        NotificationModel notification =
+                repository.findByIdAndTenantId(id, tenantId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Notification not found"));
+
+
+        repository.delete(notification);
 
     }
 
-    public void clearAll() {
 
-        repository.deleteAll();
+
+    public void clearAll(
+            String tenantId
+    ) {
+
+        repository.deleteByTenantId(tenantId);
 
     }
 }

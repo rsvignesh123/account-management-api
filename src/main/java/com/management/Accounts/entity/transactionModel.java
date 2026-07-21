@@ -99,7 +99,17 @@ public class transactionModel {
     public void setRemarks(String remarks) {
         this.remarks = remarks;
     }
+    private String tenantId;
 
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
     LocalDate transactionDate;
 
     Long amount;

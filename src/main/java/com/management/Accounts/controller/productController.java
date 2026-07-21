@@ -1,4 +1,3 @@
-
 package com.management.Accounts.controller;
 
 
@@ -11,50 +10,118 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
-@RequestMapping("/api/products")    
-public class  productController {
+@RequestMapping("/api/products")
+public class productController {
+
 
     @Autowired
     private productService service;
 
+
+
     @PostMapping
-    public productModel create(@RequestBody productModel product)
-    {
+    public productModel create(
+            @RequestBody productModel product,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        product.setTenantId(tenantId);
+
         return service.saveProduct(product);
     }
 
+
+
+
     @GetMapping
-    public List<productModel> getAll() {
-        return service.getAllProducts();
+    public List<productModel> getAll(
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        return service.getAllProducts(tenantId);
     }
+
+
+
+
+
     @GetMapping("/{id}")
-    public productModel getById(@PathVariable String id) {
-        return service.getById(id);
+    public productModel getById(
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+        return service.getById(id, tenantId);
     }
+
+
+
+
+
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable String id) {
+    public ResponseEntity<String> delete(
+            @PathVariable String id,
+            @RequestHeader("tenantId") String tenantId
+    ) {
 
-        productModel product = service.getById(id);
 
-        if (product == null) {
+        productModel product =
+                service.getById(id, tenantId);
+
+
+        if(product == null){
+
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Customer not found");
+                    .body("Product not found");
         }
 
-        service.deleteCustomer(id);
 
-        return ResponseEntity.ok("Deleted Successfully");
+        service.deleteProduct(id, tenantId);
+
+
+        return ResponseEntity.ok(
+                "Deleted Successfully"
+        );
     }
+
+
+
+
+
     @PutMapping("/{id}")
-    public productModel updateCustomer(@PathVariable String id, @RequestBody productModel product)
-    {
-        System.out.println(id);
-        return service.updateProduct(id,product);
+    public productModel update(
+            @PathVariable String id,
+            @RequestBody productModel product,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+
+        return service.updateProduct(
+                id,
+                product,
+                tenantId
+        );
     }
+
+
+
+
+
     @GetMapping("/product/{productName}")
-    public productModel getCustomerByCompanyName(@PathVariable String productName) {
-        return service.findByProductName(productName);
+    public productModel getByProductName(
+            @PathVariable String productName,
+            @RequestHeader("tenantId") String tenantId
+    ) {
+
+
+        return service.findByProductName(
+                productName,
+                tenantId
+        );
     }
+
 }

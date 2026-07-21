@@ -24,7 +24,15 @@ public class NotificationModel {
     private boolean read;
 
     private LocalDateTime createdAt;
+    private String tenantId;
 
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
     public NotificationModel(String title,
                              String message,
                              String type,

@@ -7,7 +7,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class productModel {
     @Id
     private String id;
+    public String getTenantId() {
+        return tenantId;
+    }
 
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    private String tenantId;
     public String getId() {
         return id;
     }
