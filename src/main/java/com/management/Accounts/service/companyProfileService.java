@@ -110,7 +110,7 @@ public class companyProfileService {
             existing.setLogoPath(uploadResult.get("secure_url").toString());
         }
 
-        existing.setUpdatedAt(LocalDateTime.now());
+        existing.setUpdatedAt(LocalDateTime.now()); 
 
         return repository.save(existing);
     }
